@@ -1,0 +1,133 @@
+{
+	"Buttons": [
+		{
+			"Name": "Rules", 
+			"ClickFunction": "SetTextPage",
+			"Pos": "Top"
+		},
+		{
+			"Name": "Commands",
+			"ClickFunction": "SetTextPage",
+			"Pos": "Top"
+		},
+		{
+			"Name": "Servers",
+			"ClickFunction": "SetServersPage",
+			"Pos": "Top"
+		},
+		{
+			"Name": "Close",
+			"ClickFunction": "Close",
+			"Pos": "Bottom"
+		}
+	],
+	"Pages": {
+		"Rules": [
+			"Server's rules",
+			"You must stay respectful towards staff and all players, no exceptions",
+			"Pretending to be a staff member on le bhop/surf pas ouf is forbidden ",
+			"Do not spread false informations about the server",
+			"Shooting everywhere like a retard is forbidden",
+			"Using any type of cheats is forbidden, please report cheaters in the discord",
+			"Any form of DDoS threats will result in a permanent ban from the community",
+			"Sharing violent or pornographic content in any form is strictly forbidden",
+			"Voice chat is only for chatting, as the name implies! Do not mic spam (this includes screaming because you're angry at the map)",
+			"Only English and French are allowed",
+			"Please be courteous and check if a player is about to finish a map before asking for a server wide RTV"
+		],
+		"Commands": [
+			[
+				"General",
+				["Open / close this menu", "Touche F1"],
+				["Get back to the map begining", "!restart, !r, !respawn, !kill"],
+				["Get back to the stage begining", "!laststage, !ls"],
+				["Spectate others players (can also be accessed using F2)", "!spectate, !spec, !watch, !view"],
+				["Go to an other player (only available in Practice)", "!tp, !tpto, !goto, !teleport, !tele"],
+				["Enable / disable noclip (only available Practice)", "!noclip, !freeroam, !clip, !wallhack"],
+				["Place checkpoints (only available in Practice)", "!cp, !cpmenu, !cpsave, !cpload"]
+			],
+			[
+				"Bhop styles",
+				["Display styles list", "!style, !mode, !bhop"],
+				["Switch to Normal style", "!normal, !n, !standard, default"],
+				["Switch to SideWays style", "!sideways, !sw"],
+				["Switch to Half-SideWays style", "!halsideways, !halfsw, !hsw, !h"],
+				["Switch to Unreal style", "!unreal, !ur"],
+				["Switch to Low-Gravity style", "!lg"],
+				["Switch to Practice syle", "!practice, !p"],
+				["Switch to Bonus style", "!bonus, !b, !extra"]
+			],
+			[
+				"Maps",
+				["Ask for a vote", "!rtv, !vote, !votemap"],
+				["Cancel vote request", "!revoke, !retreat, !revokertv, !rtv revoke"],
+				["See how many requests are required for the vote to happen", "!checkvotes, !votecount, !rtv check, !rtv left"],
+				["See who has asked for a vote", "!votelist, !listrtv, !rtv who, !rtv list"],
+				["See the time remaining before the start of a vote", "!timeleft, !time, !remaining"],
+				["Display the availables maps on the server", "!nominate, !rtvmap, !playmap, !addmap, !maps"],
+				["Display the maps you have completed", "!mapsbeat, !beatlist, !listbeat, !mapsdone, !mapscompleted, !beat, !done, !completed, !howgoodami"],
+				["Display the maps you have not completed", "!mapsleft, !left, !leftlist, !listleft, !notbeat, !howbadami"],
+				["See some informations about the map you are playing on", "!map, !points, !mapdata, !mapinfo, !difficulty, !tier"],
+				["See how many time the map you are playing on has been played", "!plays, !playcount, !timesplayed, !howoften, !overplayed"]
+			],
+			[
+				"Display times / records",
+				["Display the times in the style you are playing", "!wr, !wrlist, !records"],
+				["Display the times in the map you want", "!wr <nom de la map>"],
+				["Display the times in Normal style", "!wrn, !wrnormal, !nwr"],
+				["Display the times in SideWays style", "!wrsw, !wrsideways, !swwr"],
+				["Display the times in Half-SideWays style", "!wrhsw, !wrhalf, !wrhalfsw, !wrhalfsideways, !hswwr"],
+				["Display the times in Unreal style", "!wrur, !wrunreal"],
+				["Display the times in Low-Gravity style", "!wrlg, !wrlowgravity"],
+				["Display the times in Bonus style", "!wrbonus, !wrb, !bwr"],
+				["Display your records", "mywr, mywrs, wr1, wr#1, wrcount, wrcounter, countwr, wramount"]
+			],
+			[
+				"Ranking",
+				["Display the rank list", "!rank, !ranks, !ranklist"],
+				["Display the players ranking", "top, toplist, bestplayers"],
+				["Display the players ranking in the weird angles styles", "!swtop, !hswtop, !wtop, !atop"]
+			],
+			[
+				"1st / 3rd person",
+				["Switch to third person", "!thirdperson, !3p"],
+				["Switch to first person", "!firstperson, !1p"]
+			],
+			[
+				"Weapons",
+				["Get a weapon (each following command being the name of a weapon)", "!glock, !usp, !knife, !p90, !mp5, !crowbar, !deagle, !fiveseven, !m4a1, !ump45"],
+				["Strip weapons", "!remove, !strip, !stripweapons"],
+				["Left-handed / right-handed mode", "!flip, !leftweapon, !leftwep, !lefty, !flipwep, !flipweapon"]
+			],
+			[
+				"Displaying",
+				["Show the other players", "!show, !showplayers"],
+				["Hide the other players", "!hide, !hideplayers"],
+				["Show / hide the names of other players", "!playernames, !playername, !player, !playertag, !targetids, !targetid, !labels"],
+				["Enable / disable water reflexion (can save you some FPS in some maps)", "!water, !fixwater, !reflection, !refraction"],
+				["Show / hide triggers", "!triggers, !showtriggers"]
+			],
+			[
+				"Bot record",
+				["Ask to see the replay bot in the style you want", "!bot set, style, play <mode>"],
+				["Display some informations about the available bot in the style you want", "!bot infos, details <mode>"]
+			]
+		],
+		"Servers": [
+			{
+				"Name": "Le bhop pas ouf",
+				"Interaction": "Connect to this server",
+				"ID": "bhop",
+				"ServerIP": "51.178.143.105:27015",
+				"Format": "$nPlayers/$slots players | $map"
+			},
+			{
+				"Name": "Le discord pas ouf",
+				"Interaction": "Join this server",
+				"ID": "discord",
+				"DiscordURL": "https://discord.gg/BdR7Qjh",
+				"Format": "$members members ($onlineMembers online) | $bots bots"
+			}
+		]
+	}
+}

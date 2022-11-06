@@ -1,0 +1,141 @@
+{
+	"Buttons": [
+		{
+			"Name": "Règles", 
+			"ClickFunction": "SetTextPage",
+			"Pos": "Top"
+		},
+		{
+			"Name": "Commandes",
+			"ClickFunction": "SetTextPage",
+			"Pos": "Top"
+		},
+		{
+			"Name": "Serveurs",
+			"ClickFunction": "SetServersPage",
+			"Pos": "Top"
+		},
+		{
+			"Name": "Fermer",
+			"ClickFunction": "Close",
+			"Pos": "Bottom"
+		}
+	],
+	"Pages": {
+		"Règles": [
+			"Règles du serveur",
+			"Vous devez rester respectueux envers les autres joueurs",
+			"Vous n'êtes pas autorisés à prétendre que vous faites partie du staff si ce n'est pas le cas",
+			"Il est interdit de tirer partout comme un attardé",
+			"Il est interdit d'utiliser un cheat (même si vous êtes nul)",
+			"Il est interdit de partager du contenu mettant en scène du sexe ou de la violence",
+			"Vous ne devez pas spam avec la lampe torche",
+			"Comme son nom l'indique, le chat vocal ne doit être utilisé que pour parler, en aucun cas pour diffuser d'autres sons",
+			"Il est interdit de crier (même si la map vous rend fou)",
+			"Seul le français et l'anglais sont autorisés",
+			"Vous êtes encouragés à rester un minimum respectueux du travail des mappeurs",
+			"Vous êtes encouragés à vérifier si un joueur n'est pas en train d'essayer de terminer la map avant de demander un vote"
+		],
+		"Commandes": [
+			[
+				"Général",
+				["Ouvrir / fermer ce menu", "Touche F1"],
+				["Revenir au début de la map", "!restart, !r, !respawn, !kill"],
+				["Revenir au début du niveau dans lequel vous êtes", "!laststage, !ls"],
+				["Passer en mode spectateur (également accessible avec F2)", "!spectate, !spec, !watch, !view"],
+				["Se téléporter à un autre joueur (uniquement utilisable en Practice)", "!tp, !tpto, !goto, !teleport, !tele"],
+				["Passer en mode noclip (uniquement utilisable en Practice)", "!noclip, !freeroam, !clip, !wallhack"],
+				["Placer des checkpoints (uniquement utilisable en Practice)", "!cp, !cpmenu, !cpsave, !cpload"]
+			],
+			[
+				"Modes de surf",
+				["Afficher la liste de tous les modes", "!style, !mode, !bhop"],
+				["Passer en mode Normal", "!normal, !n, !standard, default"],
+				["Passer en mode SideWays", "!sideways, !sw"],
+				["Passer en mode Half-SideWays", "!halsideways, !halfsw, !hsw, !h"],
+				["Passer en mode Unreal", "!unreal, !ur"],
+				["Passer en mode Low-Gravity", "!lg"],
+				["Passer en mode Practice", "!practice, !p"],
+				["Passer en mode Bonus", "!bonus, !b, !extra"]
+			],
+			[
+				"Maps",
+				["Demander un vote", "!rtv, !vote, !votemap"],
+				["Annuler la demande de vote", "!revoke, !retreat, !revokertv, !rtv revoke"],
+				["Voir le nombre de demandes nécessaires pour qu'un vote ait lieu", "!checkvotes, !votecount, !rtv check, !rtv left"],
+				["Voir les joueurs ayant demandé un vote", "!votelist, !listrtv, !rtv who, !rtv list"],
+				["Voir le temps restant avant le lancement d'un vote", "!timeleft, !time, !remaining"],
+				["Voir la liste des maps disponibles sur le serveur", "!nominate, !rtvmap, !playmap, !addmap, !maps"],
+				["Voir la liste des maps que vous avez terminé", "!mapsbeat, !beatlist, !listbeat, !mapsdone, !mapscompleted, !beat, !done, !completed, !howgoodami"],
+				["Voir la liste des maps que vous n'avez pas terminé", "!mapsleft, !left, !leftlist, !listleft, !notbeat, !howbadami"],
+				["Afficher les informations à propos de la map sur laquelle vous êtes", "!map, !points, !mapdata, !mapinfo, !difficulty, !tier"],
+				["Afficher combien de fois la map sur laquelle vous êtes a été jouée", "!plays, !playcount, !timesplayed, !howoften, !overplayed"]
+			],
+			[
+				"Affichage des temps / records",
+				["Afficher la liste des temps dans le mode dans lequel vous êtes", "!wr, !wrlist, !records"],
+				["Afficher la liste des temps sur une map spécifique", "!wr <nom de la map>"],
+				["Afficher la liste des temps en mode Normal", "!wrn, !wrnormal, !nwr"],
+				["Afficher la liste des temps en mode SideWays", "!wrsw, !wrsideways, !swwr"],
+				["Afficher la liste des temps en mode Half-SideWays", "!wrhsw, !wrhalf, !wrhalfsw, !wrhalfsideways, !hswwr"],
+				["Afficher la liste des temps en mode Unreal", "!wrur, !wrunreal"],
+				["Afficher la liste des temps en mode Low-Gravity", "!wrlg, !wrlowgravity"],
+				["Afficher la liste des temps en mode Bonus", "!wrbonus, !wrb, !bwr"],
+				["Afficher les temps sur lesquels vous détenez le record", "mywr, mywrs, wr1, wr#1, wrcount, wrcounter, countwr, wramount"]
+			],
+			[
+				"Classement",
+				["Afficher la liste des rangs", "!rank, !ranks, !ranklist"],
+				["Afficher le classement des joueurs", "top, toplist, bestplayers"],
+				["Afficher le classement des joueurs dans les modes bizarres", "!swtop, !hswtop, !wtop, !atop"]
+			],
+			[
+				"1ère / 3ème personne",
+				["Passer en 3ème personne", "!thirdperson, !3p"],
+				["Passer en 1ère personne", "!firstperson, !1p"]
+			],
+			[
+				"Armes",
+				["Obtenir une arme (chaque commande dans cette liste correspond au nom d'une arme)", "!glock, !usp, !knife, !p90, !mp5, !crowbar, !deagle, !fiveseven, !m4a1, !ump45"],
+				["Retirer toutes les armes", "!remove, !strip, !stripweapons"],
+				["Mode gaucher / droitier", "!flip, !leftweapon, !leftwep, !lefty, !flipwep, !flipweapon"]
+			],
+			[
+				"Affichage",
+				["Activer l'affichage des joueurs", "!show, !showplayers"],
+				["Désactiver l'affichage des joueurs", "!hide, !hideplayers"],
+				["Activer / désactiver l'affichage du nom des joueurs", "!playernames, !playername, !player, !playertag, !targetids, !targetid, !labels"],
+				["Activer / désactiver les reflets de l'eau (peut permettre de gagner des FPS sur certaines maps)", "!water, !fixwater, !reflection, !refraction"],
+				["Activer / désactiver l'affichage des triggers", "!triggers, !showtriggers"]
+			],
+			[
+				"Commandes bot",
+				["Demander à voir le replay du bot dans un mode précis", "!bot set, style, play <mode>"],
+				["Voir plus d'informations sur la run d'un bot", "!bot infos, details <mode>"]
+			]
+		],
+		"Serveurs": [
+			{
+				"Name": "Le bhop pas ouf",
+				"Interaction": "Aller sur ce serveur",
+				"ID": "bhop",
+				"ServerIP": "51.178.143.105:27015",
+				"Format": "$nPlayers/$slots joueurs | $map"
+			},
+			{
+				"Name": "Le discord pas ouf",
+				"Interaction": "Rejoindre ce serveur",
+				"ID": "discord",
+				"DiscordURL": "https://discord.gg/BdR7Qjh",
+				"Format": "$members membres ($onlineMembers en ligne) | $bots bots"
+			},
+			{
+				"Name": "Équinox Deathrun",
+				"Interaction": "Aller sur ce serveur",
+				"ID": "equinox",
+				"ServerIP": "193.34.79.21:63888",
+				"Format": "$nPlayers/$slots joueurs | $map"
+			}
+		]
+	}
+}
