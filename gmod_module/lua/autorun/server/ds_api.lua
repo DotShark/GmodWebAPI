@@ -14,7 +14,7 @@ cvars.AddChangeCallback("ds_custom_id", checkCustomID)
 
 
 -- Server status
-local function postServerInfos(executeNow)
+local function updateServerStatus(executeNow)
 	if serverID == "dev" then return end
 
 	if executeNow != true then
@@ -31,7 +31,7 @@ local function postServerInfos(executeNow)
 
 	HTTP {
 		url = baseURL .. serverID .. "/infos",
-		method = "POST",
+		method = "PUT",
 		headers = {Authorization = "Bearer " .. accessToken},
 		type = "application/json",
 		body = util.TableToJSON{map = game.GetMap(), points = Timer.Multiplier, slots = game.MaxPlayers() - #bots, nPlayers = #humans, playersList = playersList},
@@ -41,21 +41,21 @@ local function postServerInfos(executeNow)
 end
 
 local function apiQueue()
-	if mustUpdate then postServerInfos(true) end
+	if mustUpdate then updateServerStatus(true) end
 end
 
 local multiplier = 1
 local function updateOnChange()
 	if Timer.Multiplier != multiplier then
 		multiplier = Timer.Multiplier
-		postServerInfos()
+		updateServerStatus()
 		return
 	end
 	
 	local humans = player.GetHumans()
 	for _, ply in pairs(humans) do
 		if (ply.Record != ply.OldRecord) or (ply.Style != ply.OldStyle) or (ply.SpecialRank != ply.OldSpecialRank) then 
-			postServerInfos()
+			updateServerStatus()
 		end
 		ply.OldRecord, ply.OldStyle, ply.OldSpecialRank = ply.Record, ply.Style, ply.SpecialRank
 	end
@@ -63,9 +63,9 @@ end
 
 hook.Add("Think", "APIQueue", apiQueue)
 hook.Add("Think", "UpdateAPI", updateOnChange)
-hook.Add("PlayerInitialSpawn", "UpdateAPI", postServerInfos)
-hook.Add("PlayerDisconnected", "UpdateAPI", postServerInfos)
-hook.Add("ShutDown", "UpdateAPI", postServerInfos)
+hook.Add("PlayerInitialSpawn", "UpdateAPI", updateServerStatus)
+hook.Add("PlayerDisconnected", "UpdateAPI", updateServerStatus)
+hook.Add("ShutDown", "UpdateAPI", updateServerStatus)
 
 
 -- Discord logs
@@ -218,7 +218,7 @@ end)
 function Player:UpdateData(data)
 	HTTP {
 		url = baseURL .. "pouf/player/" .. self:SteamID64(),
-		method = "POST",
+		method = "PATCH",
 		headers = {Authorization = "Bearer " .. accessToken},
 		type = "application/json",
 		body = util.TableToJSON(data),
