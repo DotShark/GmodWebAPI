@@ -1,4 +1,5 @@
 # GmodWebAPI
+[Click here to read this file in french](https://github.com/DotShark/GmodWebAPI/blob/main/README_FR.md)
 A Web API made in NodeJS used for my Gmod bhop and surf servers (bhop and surf being 2 gamemodes where the goal is to complete a map as quickly as possible).
 
 It's currently in use on the servers to:
