@@ -1,13 +1,13 @@
 # GmodWebAPI
 Une API web faite en NodeJS utilisée pour mes serveurs Gmod bhop et surf (le bhop et le surf étant 2 gamemodes dans lesquels le but est de terminer une map le plus rapidement posssible).
 
-Elle est actuellement utilisé sur mes serveurs pour :
+Elle est actuellement utilisée sur mes serveurs pour :
 - Afficher l'avatar et le nombre de membres du serveur Discord
-- Partager la nom de la map jouée, le nombre de joueurs connectés et la liste des joueurs entre les 2 serveurs
+- Partager le nom de la map jouée, le nombre de joueurs connectés et la liste des joueurs entre les 2 serveurs
 - Afficher un menu d'aide à partir de fichiers JSON	renvoyés par l'API
 - Stocker et retrouver des données à propos des joueurs
 - Afficher les temps des joueurs sur une map
-- Mettre en cache les positions et les angles des joueurs afin que le serveur soit capables de rejouer leur performance lorsqu'ils battent un record
+- Mettre en cache les positions et les angles des joueurs afin que le serveur soit capable de rejouer leur performance lorsqu'ils battent un record
 - Mettre en ligne une capture d'écran de la map pour que celle-ci puisse être affichée dans un menu
 - Interagir avec un bot discord qui a des fonctionnalités de logs et d'affichage du statut des serveurs en temps réel
 
