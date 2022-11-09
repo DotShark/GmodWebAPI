@@ -71,23 +71,11 @@ let playerRecorder = {
 
 // Web API
 app.use( express.json() )
+app.use( express.urlencoded({limit: "1mb"}) )
 app.use( express.raw({
 	type: ["png", "jpg"],
 	limit: "2mb"
 }) )
-
-app.get("/", (req, res) => {
-	res.send("Welcolme to DotShark's Gmod servers API, you can see the documentation <a href='https://github.com/DotShark/GmodWebAPI'>here</a>")
-})
-
-app.get("/:server", (req, res) => {
-	const gServer = req.params.server
-	if (gServer !== "bhop" && gServer !== "surf") {
-		res.status(404).send("Sorry, this server doesn't exist")
-	} else {
-		res.send("Available methods:<br/>\n- infos")
-	}
-})
 
 app.get("/discord/infos", async (req, res) => {
 	let discord = servers.discord
@@ -337,7 +325,7 @@ app.delete("/:server/recorder/:steamID64", loginToken, (req, res) => {
 	const steamID64 = req.params.steamID64
 	if (server && playerRecorder[server] && steamID64 && playerRecorder[server][steamID64]) {
 		playerRecorder[server][steamID64] = null
-		res.send(`[${server}] Deleted recorder data for ${steamID}`)
+		res.send(`[${server}] Deleted recorder data for ${steamID64}`)
 	} else {
 		res.status(403).send("Failed to delete player data: Illegal query")
 	}
@@ -398,6 +386,19 @@ app.post("/discord/message", loginToken, (req, res) => {
 		res.send("Sended the message to the discord bot")
 	} else {
 		res.status(500).send("Failed to send the body to the discord bot")
+	}
+})
+
+app.get("/", (req, res) => {
+	res.send("Welcolme to DotShark's Gmod servers API, you can see the documentation <a href='https://github.com/DotShark/GmodWebAPI'>here</a>")
+})
+
+app.get("/:server", (req, res) => {
+	const gServer = req.params.server
+	if (gServer !== "bhop" && gServer !== "surf") {
+		res.status(404).send("Sorry, this server doesn't exist")
+	} else {
+		res.send("Available methods:<br/>\n- infos")
 	}
 })
 
