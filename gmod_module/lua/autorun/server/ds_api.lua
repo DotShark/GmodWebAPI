@@ -174,7 +174,6 @@ local function logFreeze(freezeTime)
 	}
 end
 
-hook.Add("Think", "TrackFreezes", trackFreezes)
 hook.Add("RecordsLoaded", "DiscordLog", logMapChange)
 hook.Add("NewMapAdded", "DiscordLog", notifyNewMap)
 hook.Add("PlayerInitialSpawn", "DiscordLog", logPlayer)
@@ -186,12 +185,13 @@ hook.Add("TimerAddRecord", "LogDiscord", logRecord)
 -- Server freezes tracking
 local maxTickTime = 0.1
 local lastTickTime = 0
-local function trackFreezes()
+
+hook.Add("Think", "TrackFreezes", function()
 	local ct = SysTime()
 	local ellapsed = ct - lastTickTime
 	lastTickTime = ct
 	if lastTickTime > 0 and ellapsed > maxTickTime and player.GetCount() > 0 then logFreeze(ellapsed) end
-end
+end)
 
 
 -- Player data
