@@ -1,7 +1,7 @@
 -- Player data
 hook.Add("HUDPaint", "LoadPlayerData", function()
 	hook.Remove("HUDPaint", "LoadPlayerData")
-	http.Fetch("https://api.dotshark.ovh/bhop/player/" .. LocalPlayer():SteamID64(), function(json)
+	http.Fetch("https://api.dotshark.ovh/player/" .. LocalPlayer():SteamID64(), function(json)
 		local data = util.JSONToTable(json)
 		if data then hook.Call("PlayerDataLoaded", nil, data) end
 	end)

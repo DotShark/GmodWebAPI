@@ -202,14 +202,14 @@ local dataSchema = {
 }
 
 timer.Simple(0, function()
-	http.Fetch(baseURL .. "pouf/player/schema", function(json)
+	http.Fetch(baseURL .. "player/schema", function(json)
 		dataSchema = util.JSONToTable(json) or dataSchema
 	end)
 end)
 
 hook.Add("PlayerInitialSpawn", "LoadPlayerData", function(ply)
 	if ply:IsBot() then return end
-	http.Fetch(baseURL .. "pouf/player/" .. ply:SteamID64(), function(json)
+	http.Fetch(baseURL .. "player/" .. ply:SteamID64(), function(json)
 		local data = util.JSONToTable(json)
 		if data then hook.Call("PlayerDataLoaded", nil, ply, data) end
 	end)
@@ -217,7 +217,7 @@ end)
 
 function Player:UpdateData(data)
 	HTTP {
-		url = baseURL .. "pouf/player/" .. self:SteamID64(),
+		url = baseURL .. "player/" .. self:SteamID64(),
 		method = "PATCH",
 		headers = {Authorization = "Bearer " .. accessToken},
 		type = "application/json",
