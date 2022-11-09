@@ -183,12 +183,7 @@ app.get("/:server/menu/:lang", async (req, res) => {
 })
 
 app.get("/player/schema", (req, res) => {
-	const server = req.params.server
-	if (server === "bhop" || server === "pouf") {
-		res.json(bhopPlayer)
-	} else  {
-		res.status(404).send("Sorry, there isn't any data here")
-	}
+	res.json(bhopPlayer)
 })
 
 app.get("/player/:steamID64", async (req, res) => {
