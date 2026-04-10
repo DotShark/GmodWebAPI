@@ -2,7 +2,6 @@
 // require("dotenv").config()
 const express = require("express")
 const axios = require("axios")
-const gamedig = require("gamedig")
 const fs = require("fs")
 const WebSocket  = require("ws")
 const mongoose = require("mongoose")
@@ -10,18 +9,13 @@ const mysql = require("mysql2")
 const SteamID = require("steamid")
 
 const app = express()
-const imgFile = "/home/ds_web/api/images/discord.png"
+const imgFile = `${process.cwd()}/images/discord.png`
 let servers = {
 	discord: {},
 	bhop: {},
 	surf: {},
 	dev: {}
 }
-const joinURLs = {
-	bhop: "steam://connect/dotshark.ovh:27015",
-	surf: "steam://connect/dotshark.ovh:27025"
-}
-const medals = [":first_place:", ":second_place:", ":third_place:"]
 let discordBot
 
 
@@ -40,9 +34,13 @@ function loginToken(req, res, next) {
 
 // MongoDB
 const {bhopPlayer, bhopPlayers} = require("./data_models/bhopPlayer")
+const maps = require("./data_models/map")
+const { error } = require("console")
+const { GmodMap } = require("./utils/gmodMap")
 
 async function mongoLogin() {
 	try {
+		mongoose.set("strictQuery", false)
 		await mongoose.connect(process.env.MONGO_URI)
 		console.log("Connected to the MongoDB Database")
 	} catch(error) {
@@ -56,7 +54,8 @@ mongoLogin()
 // MySQL
 function createMysqlPool() {
 	const env = process.env
-	const mysqlPool = mysql.createPool({host: env.MYSQL_HOST, user: env.MYSQL_USER, password: env.MYSQL_PASSWORD, database: env.MYSQL_DATABASE})
+	const mysqlConfig = {host: env.MYSQL_HOST, user: env.MYSQL_USER, password: env.MYSQL_PASSWORD, database: env.MYSQL_DATABASE}
+	const mysqlPool = mysql.createPool(mysqlConfig)
 	return mysqlPool.promise()
 }
 
@@ -65,13 +64,13 @@ const mysqlPool = createMysqlPool()
 
 // Players recorders
 let playerRecorder = {
-	surf: {}, bhop: {}
+	surf: {}, bhop: {}, dev: {}
 }
 
 
 // Web API
-app.use( express.json() )
-app.use( express.urlencoded({limit: "1mb"}) )
+app.use( express.json({limit: "100mb"}) )
+app.use( express.urlencoded() )
 app.use( express.raw({
 	type: ["png", "jpg"],
 	limit: "2mb"
@@ -100,24 +99,6 @@ app.post("/discord.png", loginToken, (req, res) => {
 			res.send("Received discord logo")
 		}
 	})
-})
-
-app.get("/equinox/infos", async (req, res) => {
-	try {
-		const serverInfos = await gamedig.query({
-			type: "garrysmod",
-			host: "193.34.79.20",
-			port: 63908
-		})
-		res.json({
-			map: serverInfos.map,
-			slots: serverInfos.maxplayers,
-			nPlayers: serverInfos.players.length,
-			playersList: []
-		})
-	} catch {
-		res.status(404).send("No infos available for this server")
-	}
 })
 
 app.get("/:server/infos", (req, res) => {
@@ -149,6 +130,170 @@ app.put("/:server/infos", loginToken, async (req, res) => {
 	}
 })
 
+app.get("/:server/maps", async (req, res) => {
+	const serverID = req.params.server
+	if (!servers[serverID]) {
+		res.status(404).send(`There isn't any ${serverID} server`)
+		return
+	}
+
+	try {
+		const serverMaps = await maps.find({gamemode: serverID})
+		for (const map of serverMaps) {
+			map.zones = undefined
+			map.tweaks = undefined
+		}
+		res.json(serverMaps)
+	} catch (err) {
+		console.log(err)
+		res.status(404).send(`Unable to find ${serverID} maps`)
+	}
+})
+
+app.get("/:server/maps/stats", async (req, res) => {
+	const serverID = req.params.server
+	if (!servers[serverID]) {
+		res.status(404).send(`There isn't any ${serverID} server`)
+		return
+	}
+
+	try {
+		const serverMaps = await maps.find({gamemode: serverID})
+		let stats = {totalMaps: 0, totalMultiplier: 0, totalBonusMultiplier: 0}
+		for (const map of serverMaps) {
+			stats.totalMaps++
+			if (map.multiplier) stats.totalMultiplier += map.multiplier
+			if (map.bonusMultiplier) stats.totalBonusMultiplier += map.bonusMultiplier
+		}
+		if (serverID === "bhop") {
+			// multiplier calculation used to be broken on my bhop server so I have to reproduce the bug if I don't want to break players ranking
+			stats.totalMultiplier += 43057
+			stats.totalBonusMultiplier += 3987
+		}
+		res.json(stats)
+	} catch (err) {
+		console.log(err)
+		res.status(404).send(`Unable to find ${serverID} maps`)
+	}
+})
+
+app.get("/:server/maps/:mapName", async (req, res) => {
+	const serverID = req.params.server
+	if (!servers[serverID]) {
+		res.status(404).send(`There isn't any ${serverID} server`)
+		return
+	}
+
+	const mapName = req.params.mapName
+	try {
+		const mapData = await maps.findOne({gamemode: serverID, name: mapName})
+		if (!mapData) throw new Error(`Map not found ${mapName}`)
+		res.json(mapData)
+	} catch (err) {
+		console.log(err)
+		res.status(404).send(`Unable to find any info for ${mapName}`)
+	}
+})
+
+app.post("/:server/maps/:mapName", loginToken, async (req, res) => {
+	const map = {gamemode: req.params.server, name: req.params.mapName, playable: false, plays: 0}
+	try {
+		await maps.create(map)
+		res.status(201).json(map)
+	} catch (err) {
+		res.status(500).send(`Failed to create ${map.name} document`)
+	}
+})
+
+app.patch("/:server/maps/:mapName", loginToken, async (req, res) => {
+	const {server, mapName} = req.params
+	const newParams = {...req.body}
+
+	try {
+		const mapData = await maps.findOne({gamemode: server, name: mapName})
+		if (newParams.tweaks) newParams.tweaks = {...mapData._doc.tweaks, ...newParams.tweaks}
+		await maps.findOneAndUpdate({server: server, name: mapName}, newParams)
+		res.status(201).json({...mapData._doc, ...newParams})
+	} catch (err) {
+		res.status(500).send(`Failed to save ${req.params.mapName} data`)
+		console.log(err)
+	}
+})
+
+app.patch("/:server/maps/:mapName/zones", loginToken, async (req, res) => {
+	const {server, mapName} = req.params
+	const newZone = req.body
+
+	try {
+		const {zones} = await maps.findOne({gamemode: server, name: mapName})
+		if (!zones) throw new Error(`Map not found ${mapName}`)
+		let updated = false
+		console.log(newZone)
+		const newZones = zones.map((zone) => {
+			if (zone.type === newZone.type) {
+				updated = true
+				return {...zone, ...newZone}
+			} else {
+				return zone
+			}
+		})
+		if (!updated) newZones.push(newZone)
+		await maps.findOneAndUpdate({server: server, name: mapName}, {zones: newZones})
+		res.status(201).json(newZones)
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(`Failed to set zone of type ${zone.type} on ${mapName}`)
+	}
+})
+
+app.post("/:server/maps/:mapName/zones", loginToken, async (req, res) => {
+	const {server, mapName} = req.params
+	const newZone = req.body
+
+	try {
+		const {zones} = await maps.findOne({gamemode: server, name: mapName})
+		if (!zones) throw new Error(`Map not found ${mapName}`)
+		zones.push(newZone)
+		await maps.findOneAndUpdate({server: server, name: mapName}, {zones})
+		res.status(201).json(zones)
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(`Failed to set zone of type ${zone.type} on ${mapName}`)
+	}
+})
+
+app.delete("/:server/maps/:mapName/zones/:type", loginToken, async (req, res) => {
+	const {server, mapName, type} = req.params
+
+	try {
+		const {zones} = await maps.findOne({gamemode: server, name: mapName})
+		if (!zones) throw new Error(`Map not found ${mapName}`)
+		const newZones = zones.filter(zone => zone.type !== parseInt(type))
+		await maps.findOneAndUpdate({server: server, name: mapName}, {zones: newZones})
+		res.status(200).json(newZones)
+	} catch (err) {
+		console.log(err)
+		res.status(500).send(`Failed to set zone of type ${zone.type} on ${mapName}`)
+	}
+})
+
+app.post("/:server/downloadMap", loginToken, async (req, res) => {
+	const {server} = req.params
+	const {mapName} = req.body
+
+	try {
+		const map = new GmodMap(mapName)
+		await map.download()
+		await map.extractBz2()
+		await map.uploadFile("bsp", server)
+		await map.deleteFile("bsp")
+		res.status(201).json({mapName})
+	} catch(err) {
+		console.error(err)
+		res.status(500).send(`Failed to download ${mapName}`)
+	}
+})
+
 app.get("/:server.png", (req, res) => {
 	const gServer = req.params.server
 	if (gServer != "bhop" && gServer != "surf" && gServer != "equinox") {
@@ -156,15 +301,15 @@ app.get("/:server.png", (req, res) => {
 		return
 	}
 
-	res.sendFile(`/home/ds_web/api/images/${gServer}.png`)
+	res.sendFile(`${process.cwd()}/images/${gServer}.png`)
 })
 
 app.get("/:server/menu/:lang", async (req, res) => {
 	const gServer = req.params.server
 	const lang = req.params.lang
-	res.sendFile(`/home/ds_web/api/menus/${gServer}_${lang}.json`, (err) => {
+	res.sendFile(`${process.cwd()}/menus/${gServer}_${lang}.json`, (err) => {
 		if (!err) return
-		res.sendFile(`/home/ds_web/api/menus/${gServer}_en.json`, (err) => {
+		res.sendFile(`${process.cwd()}/menus/${gServer}_en.json`, (err) => {
 			if (err) res.status(404).send("Unable to find menu properties for this server")
 		})
 	})
@@ -202,7 +347,7 @@ app.get("/player/:steamID64", async (req, res) => {
 		} catch (error) {
 			console.error(error)
 		}
-		const player = await  bhopPlayers.create({SteamID64: steamID64, SteamID: id.getSteam2RenderedID(), Name: name})
+		const player = await bhopPlayers.create({SteamID64: steamID64, SteamID: id.getSteam2RenderedID(), Name: name})
 		res.json(player)
 	} catch(error) {
 		saved = false
@@ -232,7 +377,7 @@ app.patch("/player/:steamID64", loginToken, async (req, res) => {
 			res.status(500).send(error)
 		}
 	}
-} )
+})
 
 app.get("/:server/records", async (req, res) => {
 	const server = req.params.server
@@ -270,8 +415,18 @@ app.get("/:server/records", async (req, res) => {
 	rows.forEach(row => {
 		let name = new Buffer.from(row.szPlayer, "base64")
 		name = name.toString("ascii")
-		const data = row.vData.split(" ")
-		records.push({SteamID: row.szUID, Name: name, Map: row.szMap, Mode: row.nStyle, Time: row.nTime, Date: row.szDate, Speed: {Max: data[0], Average: data[1]}, Jumps: data[2], Sync: data[3]})
+		const data = row.vData && row.vData.split(" ")
+		records.push({
+			SteamID: row.szUID, 
+			Name: name,
+			Map: row.szMap,
+			Mode: row.nStyle,
+			Time: row.nTime,
+			Date: row.szDate,
+			Speed: data && {Max: data[0], Average: data[1]},
+			Jumps: data && data[2],
+			Sync: data && data[3]
+		})
 	})
 	res.json(records)
 })
@@ -341,9 +496,96 @@ app.delete("/:server/recorder", loginToken, (req, res) => {
 	}
 })
 
+app.get("/:server/recorder/bots/:map", loginToken, async (req, res) => {
+	const server = req.params.server
+	const map = req.params.map
+	const fsp = fs.promises
+	const fetchStart = Date.now()
+
+	const selectQuery = "SELECT nStyle, nTime, szDate, szPlayer, szSteam"
+	const tabName = (server == "bhop") ? "game_bots" : "surf_bots"
+	const timesTabName = (server == "bhop") ? "game_times" : "surf_times"
+	
+	const [recordBots] = await mysqlPool.execute(`${selectQuery} FROM ${tabName} WHERE szMap = ? ORDER BY nStyle ASC`, [map])
+	
+	try {
+		await fsp.access(`./record_bots/${map}`)
+	} catch {
+		await fsp.mkdir(`./record_bots/${map}`)
+	}
+
+	const getRankingPositions = recordBots.map(async (recordBot) => {
+		const [recordBotRankingPos] = await mysqlPool.execute(
+			`SELECT COUNT(*) + 1 AS nRankingPos FROM ${timesTabName} WHERE szMap = ? AND nStyle = ? AND nTime < ?`,
+			[map, recordBot.nStyle, recordBot.nTime]
+		)
+		recordBot.nRankingPos = recordBotRankingPos[0].nRankingPos
+	})
+	
+	await Promise.all(getRankingPositions)
+
+	try {
+		for (const recordBot of recordBots) {
+			recordBot.szRecord = await fsp.readFile(`./record_bots/${map}/${recordBot.nStyle}.csv`, {encoding: "utf8"})
+		}
+		console.log(`Found ${map} record bot data in record_bots files, took ${Math.floor(Date.now() - fetchStart)}ms`)
+	} catch {
+		const [recordBotsData] = await mysqlPool.execute(`SELECT nStyle, szRecord FROM ${tabName} WHERE szMap = ? ORDER BY nStyle ASC`, [map])
+		for (const recordBotData of recordBotsData) {
+			const recordBot = recordBots.find(testedRecordBot => recordBotData.nStyle === testedRecordBot.nStyle)
+			recordBot.szRecord = recordBotData.szRecord
+			await fsp.writeFile(`./record_bots/${map}/${recordBot.nStyle}.csv`, recordBot.szRecord, {encoding: "utf8"})
+		}
+		console.log(`Found ${map} record bot data in the slow database, took ${Math.floor(Date.now() - fetchStart)}ms`)
+	}
+
+	const jsonEncodingStart = Date.now()
+	res.json(recordBots)
+	console.log(`Took ${Math.floor(Date.now() - jsonEncodingStart)}ms to encode data`)
+})
+
+app.put("/:server/recorder/bots/:map/:style", loginToken, async (req, res) => {
+	const server = req.params.server
+	const map = req.params.map
+	const style = req.params.style
+	const recordBot = req.body
+	
+	const fsp = fs.promises
+	const tabName = (server == "bhop") ? "game_bots" : "surf_bots"
+
+	try {
+		await fsp.access(`./record_bots/${map}`)
+	} catch {
+		await fsp.mkdir(`./record_bots/${map}`)
+	}
+
+	try {
+		const [recordBotData] = await mysqlPool.execute(`SELECT nTime FROM ${tabName} WHERE szMap = ? AND nStyle = ?`, [map, style])
+		
+		if (recordBotData.length > 0 && typeof recordBotData[0].nTime === "number") {
+			await mysqlPool.execute(
+				`UPDATE ${tabName} SET szPlayer = ?, nTime = ?, szSteam = ?, szDate = ?, szRecord = ? WHERE szMap = ? AND nStyle = ?`,
+				[recordBot.Name, recordBot.Time, recordBot.SteamID, recordBot.Date, "", map, recordBot.Style]
+			)
+		} else {
+			await mysqlPool.execute(
+				`INSERT INTO ${tabName} VALUES (?, ?, ?, ?, ?, ?, ?)`,
+				[map, recordBot.Name, recordBot.Time, recordBot.Style, recordBot.SteamID, recordBot.Date, ""]
+			)
+		}
+		await fsp.writeFile(`./record_bots/${map}/${style}.csv`, recordBot.Record, {encoding: "utf8"})
+
+		const name = Buffer.from(recordBot.Name, "base64").toString("utf8")
+		res.send(`Saved the new record bot data for style ${style} on ${map} made by ${name}`)
+	} catch (error) {
+		console.error(error)
+		res.status(500).json({})
+	}
+})
+
 app.put("/maps/:mapName/screen", loginToken, async (req, res) => {
 	const mapName = req.params.mapName
-	const path = `/home/ds_web/pouf/discord/${mapName}.jpg`
+	const path = `${process.cwd()}/external_images/discord/${mapName}.jpg`
 	let replaced = true
 	
 	try {
@@ -363,7 +605,7 @@ app.put("/maps/:mapName/screen", loginToken, async (req, res) => {
 	res.send(`Successfully ${(replaced) ? "replaced" : "posted"} the map screenshot`)
 
 	try {
-		await axios.get(`https://pouf.dotshark.ovh/discord/${mapName}.jpg`)
+		await axios.get(`https://images.dotshark.dev/discord/${mapName}.jpg`)
 	} catch {
 		console.log("The screen can't be accessed publicly")
 	}
@@ -371,7 +613,7 @@ app.put("/maps/:mapName/screen", loginToken, async (req, res) => {
 	Object.entries(servers).forEach(async ([server, infos]) => {
 		if (infos.map !== mapName) return
 		try {
-			await axios.post(`https://api.dotshark.ovh/${server}/infos`, infos, {
+			await axios.post(`https://timerapi.dotshark.dev/${server}/infos`, infos, {
 				headers: {authorization: `Bearer ${process.env.ACCESS_TOKEN}`}
 			})
 		} finally {
@@ -389,6 +631,11 @@ app.post("/discord/message", loginToken, (req, res) => {
 	}
 })
 
+
+app.all("/testMethod", (req, res) => {
+	res.json({method: req.method})
+})
+
 app.get("/", (req, res) => {
 	res.send("Welcolme to DotShark's Gmod servers API, you can see the documentation <a href='https://github.com/DotShark/GmodWebAPI'>here</a>")
 })
@@ -402,8 +649,8 @@ app.get("/:server", (req, res) => {
 	}
 })
 
-app.listen(process.env.PORT, () => {
-	console.log(`DotShark's API listening at localhost:${process.env.PORT}`)
+app.listen(process.env.API_PORT, () => {
+	console.log(`DotShark's API listening at localhost:${process.env.API_PORT}`)
 	fs.readFile("data/servers.json", (err, data) => {
 		if (err) return
 		data = JSON.parse(data)

@@ -34,7 +34,8 @@
 			"Il est interdit de crier (même si la map vous rend fou)",
 			"Seul le français et l'anglais sont autorisés",
 			"Vous êtes encouragés à rester un minimum respectueux du travail des mappeurs",
-			"Vous êtes encouragés à vérifier si un joueur n'est pas en train d'essayer de terminer la map avant de demander un vote"
+			"Vous êtes encouragés à vérifier si un joueur n'est pas en train d'essayer de terminer la map avant de demander un vote",
+			"Ce serveur étant géré par un boomeur, faire référence à des trends pas ouf provenant de TikTok peut être passible de sanctions"
 		],
 		"Commandes": [
 			[
@@ -119,7 +120,7 @@
 				"Name": "Le bhop pas ouf",
 				"Interaction": "Aller sur ce serveur",
 				"ID": "bhop",
-				"ServerIP": "51.178.143.105:27015",
+				"ServerIP": "116.203.85.50:27015",
 				"Format": "$nPlayers/$slots joueurs | $map"
 			},
 			{
@@ -128,13 +129,6 @@
 				"ID": "discord",
 				"DiscordURL": "https://discord.gg/BdR7Qjh",
 				"Format": "$members membres ($onlineMembers en ligne) | $bots bots"
-			},
-			{
-				"Name": "Équinox Deathrun",
-				"Interaction": "Aller sur ce serveur",
-				"ID": "equinox",
-				"ServerIP": "193.34.79.21:63888",
-				"Format": "$nPlayers/$slots joueurs | $map"
 			}
 		]
 	}

@@ -146,7 +146,7 @@
 				"Name": "Le surf pas ouf",
 				"Interaction": "Connect to this server",
 				"ID": "surf",
-				"ServerIP": "51.178.143.105:27025",
+				"ServerIP": "159.69.195.82:27015",
 				"Format": "$nPlayers/$slots players | $map"
 			},
 			{

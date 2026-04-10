@@ -118,7 +118,7 @@
 				"Name": "Le bhop pas ouf",
 				"Interaction": "Connect to this server",
 				"ID": "bhop",
-				"ServerIP": "51.178.143.105:27015",
+				"ServerIP": "116.203.85.50:27015",
 				"Format": "$nPlayers/$slots players | $map"
 			},
 			{
