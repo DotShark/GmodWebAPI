@@ -198,6 +198,11 @@ app.get("/:server/maps/:mapName", async (req, res) => {
 app.post("/:server/maps/:mapName", loginToken, async (req, res) => {
 	const map = {gamemode: req.params.server, name: req.params.mapName, playable: false, plays: 0}
 	try {
+		const existing = await maps.findOne({gamemode: map.gamemode, name: map.name})
+		if (existing) {
+			res.status(409).send(`Map ${map.name} already exists for ${map.gamemode}`)
+			return
+		}
 		await maps.create(map)
 		res.status(201).json(map)
 	} catch (err) {
@@ -212,8 +217,8 @@ app.patch("/:server/maps/:mapName", loginToken, async (req, res) => {
 	try {
 		const mapData = await maps.findOne({gamemode: server, name: mapName})
 		if (newParams.tweaks) newParams.tweaks = {...mapData._doc.tweaks, ...newParams.tweaks}
-		await maps.findOneAndUpdate({server: server, name: mapName}, newParams)
-		res.status(201).json({...mapData._doc, ...newParams})
+		await maps.findOneAndUpdate({gamemode: server, name: mapName}, newParams)
+		res.status(200).json({...mapData._doc, ...newParams})
 	} catch (err) {
 		res.status(500).send(`Failed to save ${req.params.mapName} data`)
 		console.log(err)
@@ -238,8 +243,8 @@ app.patch("/:server/maps/:mapName/zones", loginToken, async (req, res) => {
 			}
 		})
 		if (!updated) newZones.push(newZone)
-		await maps.findOneAndUpdate({server: server, name: mapName}, {zones: newZones})
-		res.status(201).json(newZones)
+		await maps.findOneAndUpdate({gamemode: server, name: mapName}, {zones: newZones})
+		res.status(200).json(newZones)
 	} catch (err) {
 		console.log(err)
 		res.status(500).send(`Failed to set zone of type ${zone.type} on ${mapName}`)
@@ -254,7 +259,7 @@ app.post("/:server/maps/:mapName/zones", loginToken, async (req, res) => {
 		const {zones} = await maps.findOne({gamemode: server, name: mapName})
 		if (!zones) throw new Error(`Map not found ${mapName}`)
 		zones.push(newZone)
-		await maps.findOneAndUpdate({server: server, name: mapName}, {zones})
+		await maps.findOneAndUpdate({gamemode: server, name: mapName}, {zones})
 		res.status(201).json(zones)
 	} catch (err) {
 		console.log(err)
@@ -269,7 +274,7 @@ app.delete("/:server/maps/:mapName/zones/:type", loginToken, async (req, res) =>
 		const {zones} = await maps.findOne({gamemode: server, name: mapName})
 		if (!zones) throw new Error(`Map not found ${mapName}`)
 		const newZones = zones.filter(zone => zone.type !== parseInt(type))
-		await maps.findOneAndUpdate({server: server, name: mapName}, {zones: newZones})
+		await maps.findOneAndUpdate({gamemode: server, name: mapName}, {zones: newZones})
 		res.status(200).json(newZones)
 	} catch (err) {
 		console.log(err)
@@ -286,7 +291,9 @@ app.post("/:server/downloadMap", loginToken, async (req, res) => {
 		await map.download()
 		await map.extractBz2()
 		await map.uploadFile("bsp", server)
+		await map.uploadFile("bz2", "fastdl")
 		await map.deleteFile("bsp")
+		await map.deleteFile("bz2")
 		res.status(201).json({mapName})
 	} catch(err) {
 		console.error(err)

@@ -93,6 +93,7 @@ class GmodMap {
                 const remotePath = path.join(session.mapsPath, path.basename(filePath));
                 await sftp.put(filePath, remotePath);
             } catch (err) {
+                console.log(err);
             } finally {
                 sftp.end();
             }
