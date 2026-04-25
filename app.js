@@ -139,11 +139,37 @@ app.get("/:server/maps", async (req, res) => {
 
 	try {
 		const serverMaps = await maps.find({gamemode: serverID})
-		for (const map of serverMaps) {
-			map.zones = undefined
-			map.tweaks = undefined
+
+		let playerRecordsMap = null
+		if (req.query.player) {
+			let steam2
+			try {
+				steam2 = new SteamID(req.query.player).getSteam2RenderedID()
+			} catch {
+				res.status(400).send("Invalid SteamID64")
+				return
+			}
+			const table = serverID === "bhop" ? "game_times" : "surf_times"
+			const [rows] = await mysqlPool.execute(
+				`SELECT szMap, nStyle, nTime FROM ${table} WHERE szUID = ?`,
+				[steam2]
+			)
+			playerRecordsMap = {}
+			for (const row of rows) {
+				if (!playerRecordsMap[row.szMap]) playerRecordsMap[row.szMap] = {}
+				playerRecordsMap[row.szMap][row.nStyle] = row.nTime
+			}
 		}
-		res.json(serverMaps)
+
+		const result = serverMaps.map(map => {
+			const obj = map.toObject()
+			delete obj.zones
+			delete obj.tweaks
+			if (playerRecordsMap) obj.personalRecords = playerRecordsMap[obj.name] ?? null
+			return obj
+		})
+
+		res.json(result)
 	} catch (err) {
 		console.log(err)
 		res.status(404).send(`Unable to find ${serverID} maps`)
