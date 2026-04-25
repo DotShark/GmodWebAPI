@@ -221,14 +221,10 @@ app.get("/:server/maps/:mapName", async (req, res) => {
 	}
 })
 
+// TODO: Add race condition support
 app.post("/:server/maps/:mapName", loginToken, async (req, res) => {
 	const map = {gamemode: req.params.server, name: req.params.mapName, playable: false, plays: 0}
 	try {
-		const existing = await maps.findOne({gamemode: map.gamemode, name: map.name})
-		if (existing) {
-			res.status(409).send(`Map ${map.name} already exists for ${map.gamemode}`)
-			return
-		}
 		await maps.create(map)
 		res.status(201).json(map)
 	} catch (err) {

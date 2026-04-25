@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 const MapSchema = new mongoose.Schema({
-    name: String,
+    name: { type: String, unique: true },
     gamemode: String,
     type: Number,
     multiplier: Number,
