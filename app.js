@@ -313,7 +313,7 @@ app.post("/:server/downloadMap", loginToken, async (req, res) => {
 		await map.download()
 		await map.extractBz2()
 		await map.uploadFile("bsp", server)
-		await map.uploadFile("bz2", "fastdl")
+		await map.uploadToS3("bz2")
 		await map.deleteFile("bsp")
 		await map.deleteFile("bz2")
 		res.status(201).json({mapName})

@@ -28,9 +28,10 @@ async function main() {
     console.log("Voulez-vous mettre en ligne la map sur un miroir FastDL ? (oui / non)");
     const fastdlAnswer = (await askQuestion("")).trim();
     if (fastdlAnswer === "oui") {
-        console.log("Entrez le nom du serveur :");
+        console.log("Entrez le nom du serveur (ou \"s3\" pour le bucket S3) :");
         const sftpSession = (await askQuestion("")).trim();
-        await mapInstance.uploadFile("bz2", sftpSession);
+        if (sftpSession === "s3") await mapInstance.uploadToS3("bz2");
+        else await mapInstance.uploadFile("bz2", sftpSession);
     }
 
     console.log("Voulez-vous supprimer les fichiers que vous avez téléchargé ?");

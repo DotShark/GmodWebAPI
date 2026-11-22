@@ -1,8 +1,10 @@
 const fs = require("fs").promises;
-const { createWriteStream } = require("fs");
+const { createWriteStream, createReadStream } = require("fs");
 const axios = require("axios");
 const path = require("path");
 const Client = require("ssh2-sftp-client");
+const { S3Client } = require("@aws-sdk/client-s3");
+const { Upload } = require("@aws-sdk/lib-storage");
 const { cwd } = require("process");
 const { exec } = require("child_process");
 
@@ -63,6 +65,41 @@ class GmodMap {
             await fs.unlink(filePath);
         } catch (error) {
             console.error(`Failed to delete file: ${error.message}`);
+        }
+    }
+
+    async uploadToS3(fileType) {
+        const { S3_BUCKET, S3_REGION, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_ENDPOINT, S3_ROOT = "" } = process.env;
+        if (!S3_BUCKET || !S3_REGION || !S3_ACCESS_KEY_ID || !S3_SECRET_ACCESS_KEY) {
+            console.error("S3 upload skipped: S3_BUCKET, S3_REGION, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY are required");
+            return;
+        }
+
+        const filePath = fileType === "bz2" ? this.bz2FilePath : this.bspFilePath;
+        try {
+            await fs.access(filePath);
+        } catch {
+            return;
+        }
+
+        const client = new S3Client({
+            region: S3_REGION,
+            endpoint: S3_ENDPOINT,
+            forcePathStyle: !!S3_ENDPOINT,
+            credentials: { accessKeyId: S3_ACCESS_KEY_ID, secretAccessKey: S3_SECRET_ACCESS_KEY }
+        });
+        const root = S3_ROOT.replace(/^\/+|\/+$/g, "");
+        const key = `${root ? root + "/" : ""}maps/${path.basename(filePath)}`;
+
+        try {
+            await new Upload({
+                client,
+                params: { Bucket: S3_BUCKET, Key: key, Body: createReadStream(filePath) }
+            }).done();
+        } catch (error) {
+            console.error(`Failed to upload to S3: ${error.message}`);
+        } finally {
+            client.destroy();
         }
     }
 
